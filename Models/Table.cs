@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using System.Runtime.InteropServices;
 
 using XPTable.Editors;
 using XPTable.Events;
@@ -4467,6 +4468,102 @@ namespace XPTable.Models
         public bool VScroll
         {
             get { return this.vScrollBar == null ? false : this.vScrollBar.Visible; }
+        }
+
+        public bool ScrollToTop(int row)
+        {
+            int vscrollVal;
+
+            if (!ScrollToTopGetNewVScrollValue(row, out vscrollVal))
+                return false;
+
+            this.vScrollBar.Value = vscrollVal;
+
+            this.Invalidate(this.PseudoClientRect);
+
+            return true;
+        }
+
+        public bool ScrollToTopSmooth(int row)
+        {
+            int vscrollVal;
+
+            if (!ScrollToTopGetNewVScrollValue(row, out vscrollVal))
+                return false;
+
+            int[] steps = GetScrollSteps(this.vScrollBar.Value, vscrollVal, 10);
+
+            foreach (int v in steps)
+            {
+                this.vScrollBar.Value = v;
+
+                this.Invalidate(this.PseudoClientRect);
+            }
+
+            return true;
+        }
+
+        int[] GetScrollSteps(int start, int end, int steps)
+        {
+            int delta = end - start;
+
+            if (Math.Abs(delta) <= steps)
+            {
+                int incr = delta < 0 ? -1 : +1;
+                var arr = new List<int>();
+                for (int i = start; i != end; i = i + incr)
+                {
+                    arr.Add(i);
+                }
+                return arr.ToArray();
+            }
+            else
+            {
+                int incr = delta < 0 ? -1 : +1;
+                var arr = new List<int>();
+                for (int i = start; i != end; i = i + incr)
+                {
+                    arr.Add(i);
+                }
+                return arr.ToArray();
+            }
+        }
+
+        bool ScrollToTopGetNewVScrollValue(int row, out int vscrollVal)
+        {
+            vscrollVal = -1;
+
+            if (!this.Scrollable || !this.VScroll || row == -1)
+            {
+                return false;
+            }
+
+            vscrollVal = this.vScrollBar.Value;
+
+            if (this.VScroll)
+            {
+                if (row < 0)
+                {
+                    vscrollVal = 0;
+                }
+                else if (row >= this.RowCount)
+                {
+                    vscrollVal = this.RowCount - 1;
+                }
+                else
+                {
+                    vscrollVal = row;
+                }
+
+                if (vscrollVal > this.vScrollBar.Maximum)
+                {
+                    vscrollVal = (this.vScrollBar.Maximum) + 1;
+                }
+            }
+
+            bool moved = (this.vScrollBar.Value != vscrollVal);
+
+            return moved;
         }
         #endregion
 
