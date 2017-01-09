@@ -80,11 +80,11 @@ namespace XPTable.Models
         /// The maximum width of a Column
         /// </summary>
         public static readonly int MaximumWidth = 1024;
-        
+
         /// <summary>
         /// The minimum width of a Column
         /// </summary>
-        public static readonly int MinimumWidth = ResizePadding * 2;
+        public static readonly int MinimumWidth = 0;    //ResizePadding * 2;
 
         /// <summary>
         /// Contains the current state of the the Column
